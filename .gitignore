@@ -1,0 +1,3 @@
+djvenv/
+secret_settings.py
+.env
