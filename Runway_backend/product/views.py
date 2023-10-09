@@ -5,8 +5,8 @@ from rest_framework import viewsets,permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated,IsAdminUser
-from product.models import Category,Booking,Payment,Order,Worksheet
-from .serializers import CategorySerializer,BookingSerializer,PaymentSerializer,OrderSerializer,WorksheetSerializer
+from product.models import Category,Booking,Payment,Order,Worksheet,Route
+from .serializers import CategorySerializer,BookingSerializer,PaymentSerializer,OrderSerializer,WorksheetSerializer,WorksheetOrderSerializer,RouteSerializer
 # ,OrderSerializer
 from rest_framework import generics,status
 from auths.utilties import IsHubAdmin, IsOfficeStaff,IsDeleveryStaff,IsStaff
@@ -15,6 +15,10 @@ from  product.tasks import asign_route
 from django.db.models import Count, F
 from datetime import timedelta
 import datetime
+from rest_framework.views import APIView
+import json
+
+
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
@@ -45,7 +49,6 @@ class OrderViewSet(viewsets.ModelViewSet):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
     
-    
     def get_permissions(self):
         if self.action in ['partial_update', 'retrieve', 'list']:
             return [IsAuthenticated()]  
@@ -53,23 +56,52 @@ class OrderViewSet(viewsets.ModelViewSet):
             return [AllowAny()]
         elif self.action == 'reset_asign_flag':
             return [AllowAny()]
-        elif self.action in ['pending_oders','order_asign']:
+        elif self.action in ['pending_order','order_asign']:
             return [IsOfficeStaff()]
         else:
             return [IsAdminUser() or IsHubAdmin()]
 
-    def list(self, request, *args, **kwargs):
+    def list(self, request, *args, **kwargs):         
         if request.user.is_superuser:
             # Superusers can see all orders
             queryset = self.get_queryset()
-        elif  request.user.staff.is_hubadmin or request.user.staff.is_officeStaff:
-            queryset = self.get_queryset().filter(current_position=request.user.staff.hub)
+        elif  request.user.is_staff:
+            if request.user.staff.is_hubadmin or request.user.staff.is_officeStaff:
+                queryset = self.get_queryset().filter(current_position=request.user.staff.hub)
+            else:
+                raise ValidationError("You are not allowed")
+                
         else:
             # Regular users can only see their own orders
             queryset = Order.objects.filter(booking__user=request.user)
             # queryset=Booking.objects.f
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
+    
+    
+    
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        # Check if the order has a related route
+        try:
+            route = Route.objects.get(order=instance)
+            route_data = json.loads(route.route)
+        except Route.DoesNotExist:
+            route_data = None
+
+        if instance.booking.user == request.user or request.user.is_superuser or request.user.staff.is_officeStaff or request.user.staff.is_deleverystaff:
+            serializer = self.get_serializer(instance)
+
+            # Include route_data in the response if it exists
+            if route_data:
+                response_data = serializer.data
+                response_data['route'] = route_data
+                return Response(response_data)
+
+            return Response(serializer.data)
+        else:
+            raise ValidationError("You are not allowed to get this data")
+    
     
     def partial_update(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -104,9 +136,9 @@ class OrderViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['GET'])
     def pending_order(self, request):
         if request.user.is_superuser:
-            queryset = self.get_queryset().filter(collected=False)
+            queryset = self.get_queryset().filter(collected=False , status='pending')
         elif request.user.staff.is_officeStaff or request.user.staff.is_hubadmin:
-            queryset = self.get_queryset().filter(booking__from_hub=request.user.staff.hub,collected=False,asign=False) 
+            queryset = self.get_queryset().filter(booking__from_hub=request.user.staff.hub,collected=False,asign=False,status='pending') 
         else:
             raise ValidationError("You are not allowed to update this order.")
             return Response (status=status.HTTP_401_UNAUTHORIZED)
@@ -178,7 +210,7 @@ class WorksheetViewSet(viewsets.ModelViewSet):
         sheet_number = 'Sheet'+ sheet_number
         request.data["name"]=sheet_number
         # Create the worksheet
-        worksheet_serializer = self.get_serializer(data=request.data)
+        worksheet_serializer = WorksheetOrderSerializer(data=request.data)
         if worksheet_serializer.is_valid():
             worksheet = worksheet_serializer.save()
 
@@ -209,3 +241,8 @@ class WorksheetViewSet(viewsets.ModelViewSet):
         queryset = self.get_queryset().filter(user=request.user.staff,is_closed=False)
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class AdminDash(APIView):
+    def get(self, request, *args, **kwargs):
+        pass

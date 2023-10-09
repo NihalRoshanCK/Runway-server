@@ -65,7 +65,7 @@ class OfficeStaffViewSerializer(serializers.ModelSerializer):
         extra_kwargs = {'password': {'write_only': True}}
 class HubSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Staff
+        model = Hub
         fields = '__all__'
 class DeliveryStaffSerializer(serializers.ModelSerializer):
     user=UserSerializer()

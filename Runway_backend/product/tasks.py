@@ -6,6 +6,8 @@ import logging
 from product.utilities import find_nearby_hubs,geocode_location,calculate_distance
 import networkx as nx
 import json 
+from hubs.serializer import HubSerializer
+import re
 
 @shared_task
 def asign_route(order):
@@ -41,8 +43,11 @@ def asign_route(order):
     designated_hotspot=hotspots[len(hotspots)-1]
     starting_hotspot = hotspots[0]
     shortest_path = nx.shortest_path(G, source=starting_hotspot, target=designated_hotspot, weight='weight')
-    shortest_path_ids = [hub.id for hub in shortest_path]
+    shortest_path_data = HubSerializer(shortest_path, many=True).data
+    
+    # Serialize the shortest_path to JSON
+    path_json = json.dumps(shortest_path_data,ensure_ascii=False)
     route_order=Order.objects.get(pk=order["id"])
-    path=Route.objects.create(route=json.dumps(shortest_path_ids),order=route_order ,is_routed=True)
+    path = Route.objects.create(route=path_json, order=route_order, is_routed=True)
     path.save()
     return

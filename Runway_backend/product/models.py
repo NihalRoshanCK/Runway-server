@@ -44,6 +44,7 @@ class Order(models.Model):
         ('in_progress', 'In Progress'),
         ('completed', 'Completed'),
         ('return', 'Return'),
+        ('transferring', 'Transferring'),
     ]
     order_id=models.CharField(max_length=100, unique=True)
     booking=models.OneToOneField(Booking, on_delete=models.CASCADE, null=True, blank=True)
