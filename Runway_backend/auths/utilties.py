@@ -43,3 +43,13 @@ class IsDeleveryStaff(BasePermission):
 class IsStaff(BasePermission):
     def has_permission(self, request, view):
         return request.user.staff
+    
+class IsAdminOrIshubadmin(BasePermission):
+    def has_permission(self, request, view):
+        return request.user.is_superuser and request.user.staff.staff.is_hubadmin
+    
+
+
+class IsAdminOrIshubadminOrOfficeSaff(BasePermission):
+    def has_permission(self, request, view):
+        return request.user.is_superuser or request.user.staff.staff.is_hubadmin or request.user.staff.is_officeStaff

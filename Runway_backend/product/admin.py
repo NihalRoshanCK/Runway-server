@@ -7,4 +7,7 @@ admin.site.register(Booking)
 admin.site.register(Order)
 admin.site.register(Payment)
 admin.site.register(Route)
+admin.site.register(DataReport)
+
+
 

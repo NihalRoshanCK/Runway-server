@@ -24,7 +24,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     phone=models.BigIntegerField(null=True)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
-
+    created_at = models.DateTimeField(auto_now_add=True)
     objects = CustomUserManager()
 
     USERNAME_FIELD = 'email'
@@ -42,7 +42,7 @@ class Staff(models.Model):
     is_deleverystaff = models.BooleanField(default=False)
     is_hubadmin=models.BooleanField(default=False)
     hub = models.ForeignKey('hubs.Hub', on_delete=models.SET_NULL, null=True, related_name='staff_members')
-
+    created_at = models.DateTimeField(auto_now_add=True)
     def __str__(self):
         return self.user.email
     

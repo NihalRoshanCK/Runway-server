@@ -3,11 +3,15 @@ from hubs.models import Hub
 from django.contrib.postgres.fields import JSONField
 from auths.models import CustomUser,Staff
 from socketSystem.models import Notification,NotificationContent
+
+from datetime import datetime
 # Create your models here.
+
 class Category(models.Model):
     name = models.CharField(max_length=100,unique=True)
     description = models.TextField()
     price=models.IntegerField()
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.name
@@ -53,7 +57,12 @@ class Order(models.Model):
     collected=models.BooleanField(default=False)
     route_added=models.BooleanField(default=False)
     status=models.CharField(max_length=50, choices=STATUS_CHOICES)
-    created_at=models.DateTimeField(auto_now_add=True)
+    created_at=models.DateField(auto_now_add=True)
+    collected_at=models.DateField(null=True, blank=True)
+    nearest_hub_at=models.DateField(null=True, blank=True)
+    out_for_delivery=models.DateField(null=True, blank=True)
+    delivered_at=models.DateField(null=True, blank=True)
+    returned_at=models.DateField(null=True, blank=True)
 
     def __str__(self):
         return self.order_id
@@ -63,8 +72,18 @@ class Order(models.Model):
             message=f"{'A new booking as been created on order id :'}{self.order_id}"
             notification_condent=NotificationContent.objects.create(message=message)
             notification=Notification.objects.create(user=self.booking.from_hub.hub_head,content=notification_condent)
-            print(notification)
+        if self.collected and not self.collected_at:
+            self.collected_at = datetime.now()
+        if self.collected and self.collected_at and self.current_position.id == self.booking.to_hub.id and not self.nearest_hub_at:
+            self.nearest_hub_at = datetime.now()
+        if self.collected and self.current_position.id == self.booking.to_hub.id  and self.asign and not self.out_for_delivery :
+            self.out_for_delivery = datetime.now()
+        if self.collected and self.collected_at and self.current_position.id == self.booking.to_hub.id and self.status=="completed":
+            self.delivered_at = datetime.now()
+        if  self.status=="return":
+            self.returned_at = datetime.now()
         super(Order, self).save(*args, **kwargs)
+        
 
 PAYMENT_METHOD_CHOICES = [
     ('credit_card', 'Credit Card'),
@@ -85,6 +104,7 @@ class Route(models.Model):
     route= models.JSONField(null=True)
     order=models.OneToOneField(Order, on_delete=models.SET_NULL, null=True)
     is_routed=models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
 
 class Worksheet(models.Model):
     name = models.CharField(max_length=100, unique=True)
@@ -92,5 +112,15 @@ class Worksheet(models.Model):
     user=models.ForeignKey(Staff,on_delete=models.CASCADE)
     is_closed=models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
+    def __str__(self):
+        return self.name
+
+from django.db import models
+
+class DataReport(models.Model):
+    name = models.CharField(max_length=255)
+    csv_file = models.FileField(upload_to='data_reports/')  
+    created_at = models.DateTimeField(auto_now_add=True)
+    
     def __str__(self):
         return self.name

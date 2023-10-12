@@ -10,6 +10,7 @@ class Hub(models.Model):
     is_hotspot=models.BooleanField(default=False)
     is_active=models.BooleanField(default=False)
     number = models.BigIntegerField()
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.hub_name

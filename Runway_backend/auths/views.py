@@ -29,27 +29,41 @@ class CombinedUserLoginView(APIView):
                 elif role == 'hub_admin':
                     user = CustomUser.objects.get(email=email, is_staff=True)
                     staff=user.staff
+                    # user["is_hubadmin"]=True
+                    # user["is_officestaff"]=False
+                    # user["is_deleverystaff"]=False
+                    
                     if not staff.is_hubadmin:
                         raise PermissionDenied("You don't have permission to perform this action.")
                 elif role == 'office_staff':
                     user = CustomUser.objects.get(email=email, is_staff=True)
                     staff=user.staff
+                    # user["is_hubadmin"]=False
+                    # user["is_officestaff"]=True
+                    # user["is_deleverystaff"]=False
                     if not staff.is_officeStaff:
                         raise PermissionDenied("You don't have permission to perform this action.")
                 elif role == 'delivery_staff':
                     user = CustomUser.objects.get(email=email, is_staff=True)
                     staff=user.staff
+                    # user["is_hubadmin"]=False
+                    # user["is_officestaff"]=False
+                    # user["is_deleverystaff"]=True
                     if not staff.is_deleverystaff:
                         raise PermissionDenied("You don't have permission to perform this action.")
                 else:
                     # return Response({'message': 'Invalid role.'}, status=status.HTTP_400_BAD_REQUEST)
                     user=CustomUser.objects.get(email=email)
-
+                    # user["is_hubadmin"]=False
+                    # user["is_officestaff"]=False
+                    # user["is_deleverystaff"]=False
                 if user.check_password(password):
                     refresh = RefreshToken.for_user(user)
+                    user_serializer = UserSerializer(user)
                     data = {
                         'refresh': str(refresh),
                         'access': str(refresh.access_token),
+                        "user":user_serializer.data
                         }
                     data['access_token_payload'] = {
                     'role': role
