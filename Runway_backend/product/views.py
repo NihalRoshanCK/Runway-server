@@ -17,7 +17,7 @@ from datetime import timedelta
 import datetime
 from rest_framework.views import APIView
 import json
-from datetime import datetime
+# from datetime import datetime
 
 # from product.tests import asign_route
 

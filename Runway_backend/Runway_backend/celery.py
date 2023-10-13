@@ -20,7 +20,7 @@ app.conf.beat_schedule= {
         'task':'product.tasks.Booking_delete',
         'schedule': timedelta(hours=3),
 
-    },
+    }
     # 'daily-review':{
     #     'task':'product.tasks.Review',
     #     'schedule': timedelta(minutes=2),
