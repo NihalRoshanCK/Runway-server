@@ -18,7 +18,7 @@ from admins.serializers import HubSerializer,HubAdminSerializer,HubAdminViewSetS
 from rest_framework.permissions import IsAuthenticated, IsAdminUser,BasePermission
 from product.models import Payment,Order
 from auths.utilties import IsHubAdmin
-from datetime import datetime
+
 
 from django.db.models.functions import TruncMonth
 # Create your views here.
@@ -127,7 +127,7 @@ class AdminDash(APIView):
         if prev_month_user != 0:
             users_difference = ((current_month_user - prev_month_user) / prev_month_user) * 100
         else:
-            users_difference = current_month_user * 100  # If no previous month users, use current month count as 100%
+            users_difference = current_month_user - prev_month_user * 100  # If no previous month users, use current month count as 100%
 
         # Getting hub details
         # Count the number of hubs for the current month
@@ -180,7 +180,7 @@ class AdminDash(APIView):
         if prev_month_amount != 0:
             amount_difference = ((current_month_amount - prev_month_amount) / prev_month_amount) * 100
         else:
-            amount_difference = current_month_amount * 100  # If no previous month amount, use current month amount as 100%
+            amount_difference = current_month_amount-prev_month_amount * 100  # If no previous month amount, use current month amount as 100%
             
         # Define the possible statuses
         possible_statuses = ['pending', 'in_progress', 'completed', 'return']

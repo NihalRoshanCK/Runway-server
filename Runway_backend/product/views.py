@@ -54,7 +54,7 @@ class OrderViewSet(viewsets.ModelViewSet):
     serializer_class = OrderSerializer
     
     def get_permissions(self):
-        if self.action in ['partial_update', 'retrieve', 'list']:
+        if self.action in ['partial_update', 'retrieve', 'list','trackorder']:
             return [IsAuthenticated()]  
         elif self.action == 'create':
             return [AllowAny()]
@@ -121,6 +121,37 @@ class OrderViewSet(viewsets.ModelViewSet):
         else:   
             queryset=Order.objects.filter(booking__from_hub=request.user.staff.hub,status='pending')
             
+            
+    @action(detail=False, methods=['POST'])        
+    def current_position(self, request):
+        order_id = request.data.get('orderId')
+        # if request.user._is_superuser:
+            # queryset=Order.objects.filter(status='pending')
+        # else:
+        order=Order.objects.get(order_id=order_id)
+        order.current_position=request.user.staff.hub
+        order.save() 
+        # queryset=Order.objects.filter(booking__from_hub=request.user.staff.hub,status='pending')
+        return OrderSerializer(order).data
+    
+    @action(detail=False, methods=['POST'])        
+    def trackorder(self, request):
+        order_id = request.data.get('orderId')
+        # if request.user._is_superuser:
+            # queryset=Order.objects.filter(status='pending')
+        # else:
+        try:
+            order = Order.objects.get(order_id=order_id)
+        except Order.DoesNotExist:
+            return Response({"message": "Order not found."}, status=status.HTTP_404_NOT_FOUND)
+        if order.booking.user==request.user or request.user.is_superuser or request.user.staff.is_officeStaff or request.user.staff.is_deleverystaff:
+             
+            return Response({"message": "you dont have the permition to view ","data":OrderSerializer(order).data}, status=status.HTTP_200_OK)
+        else:
+             return Response({"message": "you dont have the permition to view "}, status=status.HTTP_400_BAD_REQUEST)
+        
+            
+        # queryset=Order.objects.filter(booking__from_hub=request.user.staff.hub,status='pending')
     
     @action(detail=False, methods=['POST'])
     def order_asign(self, request):
