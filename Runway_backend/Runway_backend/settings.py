@@ -92,6 +92,9 @@ INSTALLED_APPS = [
     'celery.result',
     'django_celery_results',
     'django_celery_beat',
+    'cloudinary_storage',
+    "cloudinary"
+    
 ]
 
 MIDDLEWARE = [
@@ -227,6 +230,18 @@ EMAIL_USE_TLS=env('EMAIL_USE_TLS')
 #media uploding folders
 MEDIA_ROOT = BASE_DIR /'uploads'
 MEDIA_URL = '/media/'
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+
+CLOUDINARY_ALLOWED_FORMATS = [
+    'jpg', 'jpeg', 'png', 'gif',  # Add other image formats as needed
+    'pdf', 'doc', 'docx',         # Add DOC and PDF formats
+]
+
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': env('CLOUD_NAME'),
+    'API_KEY': env('CLOUDINARY_API_KEY'),
+    'API_SECRET': env('CLOUDINARY_API_SECRET'),
+}
 
 CHANNEL_LAYERS = {
     "default": {
