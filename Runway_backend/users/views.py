@@ -28,7 +28,37 @@ class RegisterHandler(APIView):
             otp = genarate_otp(email)
             return Response(otp, status=status.HTTP_200_OK)
 
+class ForgetpasswordHandler(APIView):
+    """Handle forget password of user"""
+
+    def post(self, request):
+        email = request.data.get('email')
+        try:
+            user = CustomUser.objects.get(email=email)
+            # return Response({"detail": "Active account found in the given credentials"}, status=status.HTTP_401_UNAUTHORIZED)
+            otp = genarate_otp(email)
+            return Response({"data":otp}, status=status.HTTP_200_OK)
+ 
+        except Exception as e:
+            return Response({"message": "no Active account found in the given credentials"}, status=status.HTTP_401_UNAUTHORIZED)
+            
+class Forgetpassword(APIView):
+    """Handle forget password of user"""
+
+    def post(self, request):
+        email = request.data.get('email')
+        password = request.data.get('password')
         
+        try:
+            user = CustomUser.objects.get(email=email)
+            # return Response({"detail": "Active account found in the given credentials"}, status=status.HTTP_401_UNAUTHORIZED)
+            # otp = genarate_otp(email)
+            user.set_password(password)
+            user.save()
+            return Response(status=status.HTTP_200_OK)
+ 
+        except Exception as e:
+            return Response({"message": "no Active account found in the given credentials"}, status=status.HTTP_401_UNAUTHORIZED)
 
 class RegistrationView(CreateAPIView):
     serializer_class = UserSerializer
