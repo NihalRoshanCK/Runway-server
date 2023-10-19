@@ -146,7 +146,7 @@ class OrderViewSet(viewsets.ModelViewSet):
             return Response({"message": "Order not found."}, status=status.HTTP_404_NOT_FOUND)
         if order.booking.user==request.user or request.user.is_superuser or request.user.staff.is_officeStaff or request.user.staff.is_deleverystaff:
              
-            return Response({"message": "you dont have the permition to view ","data":OrderSerializer(order).data}, status=status.HTTP_200_OK)
+            return Response(OrderSerializer(order).data, status=status.HTTP_200_OK)
         else:
              return Response({"message": "you dont have the permition to view "}, status=status.HTTP_400_BAD_REQUEST)
         

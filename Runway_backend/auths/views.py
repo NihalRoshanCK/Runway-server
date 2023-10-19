@@ -13,7 +13,8 @@ from auths.serializer import UserSerializer
 from auths.models import Staff
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework.decorators import action
-
+from rest_framework.exceptions import ValidationError
+from django.contrib.auth.hashers import check_password,make_password
 
         
 class CombinedUserLoginView(APIView):
@@ -38,25 +39,18 @@ class CombinedUserLoginView(APIView):
                 elif role == 'office_staff':
                     user = CustomUser.objects.get(email=email, is_staff=True)
                     staff=user.staff
-                    # user["is_hubadmin"]=False
-                    # user["is_officestaff"]=True
-                    # user["is_deleverystaff"]=False
+           
                     if not staff.is_officeStaff:
                         raise PermissionDenied("You don't have permission to perform this action.")
                 elif role == 'delivery_staff':
                     user = CustomUser.objects.get(email=email, is_staff=True)
                     staff=user.staff
-                    # user["is_hubadmin"]=False
-                    # user["is_officestaff"]=False
-                    # user["is_deleverystaff"]=True
                     if not staff.is_deleverystaff:
                         raise PermissionDenied("You don't have permission to perform this action.")
                 else:
                     # return Response({'message': 'Invalid role.'}, status=status.HTTP_400_BAD_REQUEST)
                     user=CustomUser.objects.get(email=email)
-                    # user["is_hubadmin"]=False
-                    # user["is_officestaff"]=False
-                    # user["is_deleverystaff"]=False
+                    
                 if user.check_password(password):
                     refresh = RefreshToken.for_user(user)
                     user_serializer = UserSerializer(user)
@@ -98,12 +92,26 @@ class UserViewSet(viewsets.ModelViewSet):
             return Response(serializer.data)
         else:
             raise ValidationError("You are not allowed to retrieve this user's data.")
-    
     def partial_update(self, request, *args, **kwargs):
         instance = self.get_object()
 
         # Check if the current user is the owner of the instance or an admin
         if instance == request.user or request.user.is_superuser:
+            data = request.data
+
+            # Check if 'password' is in the request data
+            if 'new_password' in data and instance==request.user:
+                # Check if 'current_password' is in the request data
+                if 'current_password' not in data:
+                    raise ValidationError("Current password is required to change the password.")
+
+                # Check if the provided current password is correct
+                if not check_password(data['current_password'], instance.password):
+                    return Response({'detail': 'Current password is incorrect.'}, status=status.HTTP_400_BAD_REQUEST)
+                # Update the user's password with the new password
+                instance.set_password(data['new_password'])
+                instance.save()
+
             return super().partial_update(request, *args, **kwargs)
         else:
             raise ValidationError("You are not allowed to update this user's data.")

@@ -3,9 +3,9 @@ from auths.models import  CustomUser
 
 
 class Hub(models.Model):
-    hub_name = models.CharField(max_length=100)
+    hub_name = models.CharField(max_length=100,unique=True)
     address = models.CharField(max_length=200)
-    location = models.PointField(geography=True, srid=4326)
+    location = models.PointField(geography=True, srid=4326,unique=True)
     hub_head = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, related_name='hubs')
     is_hotspot=models.BooleanField(default=False)
     is_active=models.BooleanField(default=False)

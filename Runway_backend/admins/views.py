@@ -4,7 +4,7 @@ from django.utils import timezone
 from datetime import datetime, timedelta
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status
+from rest_framework import status,serializers
 from rest_framework.authtoken.models import Token
 from rest_framework.generics import CreateAPIView, RetrieveAPIView, DestroyAPIView, UpdateAPIView, ListAPIView,ListCreateAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated,IsAdminUser
@@ -56,6 +56,16 @@ class HubViewSet(viewsets.ModelViewSet):
     queryset = Hub.objects.all()
     serializer_class = HubCreationSerializer
     permission_classes = [IsAdminUser]
+
+    def create(self, request, *args, **kwargs):
+        try:
+            serializer = self.get_serializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            self.perform_create(serializer)
+            headers = self.get_success_headers(serializer.data)
+            return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+        except serializers.ValidationError as e:
+            return Response(e.detail, status=status.HTTP_400_BAD_REQUEST)
     
 class AdminDash(APIView):
     def get(self, request, *args, **kwargs):

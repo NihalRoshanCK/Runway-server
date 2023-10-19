@@ -12,7 +12,6 @@ class UserSerializer(ModelSerializer):
     def validate(self, data):
         
         # For PATCH request, ensure users can only update their own data
-        
         if self.context['request'].method == 'PATCH':
             if 'profile_picture' in data or 'number' in data:
                 user = self.context['request'].user
@@ -20,3 +19,4 @@ class UserSerializer(ModelSerializer):
                     if user.id != self.instance.id :
                         raise ValidationError("You are not allowed to update these fields.")
         return data
+    
