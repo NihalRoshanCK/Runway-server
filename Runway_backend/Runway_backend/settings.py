@@ -228,8 +228,13 @@ EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
 EMAIL_USE_TLS=env('EMAIL_USE_TLS')
 
 #media uploding folders
+
+
 MEDIA_ROOT = BASE_DIR /'uploads'
+
+
 MEDIA_URL = '/media/'
+
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
 CLOUDINARY_ALLOWED_FORMATS = [
