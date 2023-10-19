@@ -53,6 +53,7 @@ MIDDLEWARE = [
 
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:5173',  # Add your frontend domain here
+    'https://ranway-client.vercel.app'
 ]
 
 CORS_ALLOW_METHODS = [
