@@ -26,27 +26,42 @@ class CombinedUserLoginView(APIView):
         if email and password and role:
             try:
                 if role == 'admin':
-                    user = CustomUser.objects.filter(email=email, is_superuser=True).first()
+                    try:        
+                        user = CustomUser.objects.filter(email=email, is_superuser=True).first()
+                    except:
+                        return Response({"message":"Invalid Credentials"},status=status.HTTP_401_UNAUTHORIZED)
                 elif role == 'hub_admin':
-                    user = CustomUser.objects.get(email=email, is_staff=True)
-                    staff=user.staff
+                    try:
+                        
+                        user = CustomUser.objects.get(email=email, is_staff=True)
+                        staff=user.staff
                     # user["is_hubadmin"]=True
                     # user["is_officestaff"]=False
                     # user["is_deleverystaff"]=False
-                    
+                    except:
+                        return Response({"message":"Invalid Credentials"},status=status.HTTP_401_UNAUTHORIZED)
                     if not staff.is_hubadmin:
-                        raise PermissionDenied("You don't have permission to perform this action.")
+                        return Response({"message":"Invalid Credentials"},status=status.HTTP_401_UNAUTHORIZED)
+                        # raise PermissionDenied("You don't have permission to perform this action.")
                 elif role == 'office_staff':
-                    user = CustomUser.objects.get(email=email, is_staff=True)
-                    staff=user.staff
-           
+                    try:
+                        user = CustomUser.objects.get(email=email, is_staff=True)
+                        staff=user.staff
+                    except:
+                        return Response({"message":"Invalid Credentials"},status=status.HTTP_401_UNAUTHORIZED) 
                     if not staff.is_officeStaff:
-                        raise PermissionDenied("You don't have permission to perform this action.")
+                        return Response({"message":"Invalid Credentials"},status=status.HTTP_401_UNAUTHORIZED) 
+                        # raise PermissionDenied("You don't have permission to perform this action.")
                 elif role == 'delivery_staff':
-                    user = CustomUser.objects.get(email=email, is_staff=True)
-                    staff=user.staff
+                    try:
+                        user = CustomUser.objects.get(email=email, is_staff=True)
+                        staff=user.staff
+                    except:
+                        return Response({"message":"Invalid Credentials"},status=status.HTTP_401_UNAUTHORIZED) 
+                        
                     if not staff.is_deleverystaff:
-                        raise PermissionDenied("You don't have permission to perform this action.")
+                        return Response({"message":"Invalid Credentials"},status=status.HTTP_401_UNAUTHORIZED) 
+
                 else:
                     # return Response({'message': 'Invalid role.'}, status=status.HTTP_400_BAD_REQUEST)
                     user=CustomUser.objects.get(email=email)

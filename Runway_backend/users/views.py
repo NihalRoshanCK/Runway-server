@@ -13,7 +13,7 @@ from rest_framework import viewsets
 from auths.models import CustomUser
 from users.serializers import UserSerializer
 # from auths.utilties import genarate_otp
-
+from datetime import datetime
 
 class RegisterHandler(APIView):
     """Handle creating new user"""
@@ -26,8 +26,27 @@ class RegisterHandler(APIView):
  
         except Exception as e:
             otp = genarate_otp(email)
-            return Response(otp, status=status.HTTP_200_OK)
-
+            current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            response_data = {
+                "otp": otp,
+                "time": current_time
+            }
+            return Response({"data":response_data}, status=status.HTTP_200_OK)
+class ResendOtp(APIView):
+    def post(self, request):
+        email = request.data.get('email')
+        
+        try:
+            user = CustomUser.objects.get(email=email)
+            return Response({"message": "Active account found in the given credentials"}, status=status.HTTP_401_UNAUTHORIZED)
+        except Exception as e:
+            otp = genarate_otp(email)
+            current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            response_data = {
+                "otp": otp,
+                "time": current_time
+            }
+            return Response({"data":response_data}, status=status.HTTP_200_OK)
 class ForgetpasswordHandler(APIView):
     """Handle forget password of user"""
 
@@ -37,7 +56,12 @@ class ForgetpasswordHandler(APIView):
             user = CustomUser.objects.get(email=email)
             # return Response({"detail": "Active account found in the given credentials"}, status=status.HTTP_401_UNAUTHORIZED)
             otp = genarate_otp(email)
-            return Response({"data":otp}, status=status.HTTP_200_OK)
+            current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            response_data = {
+                "otp": otp,
+                "time": current_time
+            }
+            return Response({"data":response_data}, status=status.HTTP_200_OK)
  
         except Exception as e:
             return Response({"message": "no Active account found in the given credentials"}, status=status.HTTP_401_UNAUTHORIZED)
