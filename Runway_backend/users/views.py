@@ -99,6 +99,7 @@ class RegistrationView(CreateAPIView):
             'refresh': str(refresh),
             'access': str(refresh.access_token),
             'user': UserSerializer(user).data,
+            'role':'user'
         }
         return Response(data, status=status.HTTP_200_OK)
 
