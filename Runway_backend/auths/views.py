@@ -27,7 +27,7 @@ class CombinedUserLoginView(APIView):
             try:
                 if role == 'admin':
                     try:        
-                        user = CustomUser.objects.filter(email=email, is_superuser=True).first()
+                        user = CustomUser.objects.get(email=email, is_superuser=True)
                     except:
                         return Response({"message":"Invalid Credentials"},status=status.HTTP_401_UNAUTHORIZED)
                 elif role == 'hub_admin':
