@@ -158,13 +158,12 @@ class OrderViewSet(viewsets.ModelViewSet):
         try:
             order_id = request.data.get('orderId')
             order = Order.objects.get(order_id=order_id, asign=False)
-            
             # You should pass the 'order' instance to the serializer, not 'queryset'
             serializer = self.get_serializer(order)
             
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Order.DoesNotExist:
-            return Response({"error": "Order not found or already assigned"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"message": "Order not found or already assigned"}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
