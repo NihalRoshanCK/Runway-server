@@ -99,6 +99,7 @@ class StaffSerializer(serializers.ModelSerializer):
         else:
             staff_data['hub']=self.context['request'].user.staff.hub
         validated_data["is_staff"]=True
+        validated_data["is_active"]=True
         password=validated_data.pop('password')
         user=CustomUser(**validated_data)
         user.set_password(password)
