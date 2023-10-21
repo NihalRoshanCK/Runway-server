@@ -28,12 +28,16 @@ class CombinedUserLoginView(APIView):
                 if role == 'admin':
                     try:        
                         user = CustomUser.objects.get(email=email, is_superuser=True)
+                        if not user.is_active:
+                            return Response({"message": "Your account has been deactivated by admin"},status=status.HTTP_403_FORBIDDEN)
                     except:
                         return Response({"message":"Invalid Credentials"},status=status.HTTP_401_UNAUTHORIZED)
                 elif role == 'hub_admin':
                     try:
                         
                         user = CustomUser.objects.get(email=email, is_staff=True)
+                        if not user.is_active:
+                            return Response({"message": "Your account has been deactivated by admin"},status=status.HTTP_403_FORBIDDEN)
                         staff=user.staff
                     # user["is_hubadmin"]=True
                     # user["is_officestaff"]=False
@@ -46,6 +50,8 @@ class CombinedUserLoginView(APIView):
                 elif role == 'office_staff':
                     try:
                         user = CustomUser.objects.get(email=email, is_staff=True)
+                        if not user.is_active:
+                            return Response({"message": "Your account has been deactivated by admin"},status=status.HTTP_403_FORBIDDEN)
                         staff=user.staff
                     except:
                         return Response({"message":"Invalid Credentials"},status=status.HTTP_401_UNAUTHORIZED) 
@@ -55,6 +61,8 @@ class CombinedUserLoginView(APIView):
                 elif role == 'delivery_staff':
                     try:
                         user = CustomUser.objects.get(email=email, is_staff=True)
+                        if not user.is_active:
+                            return Response({"message": "Your account has been deactivated by admin"},status=status.HTTP_403_FORBIDDEN)
                         staff=user.staff
                     except:
                         return Response({"message":"Invalid Credentials"},status=status.HTTP_401_UNAUTHORIZED) 
@@ -65,6 +73,8 @@ class CombinedUserLoginView(APIView):
                 else:
                     # return Response({'message': 'Invalid role.'}, status=status.HTTP_400_BAD_REQUEST)
                     user=CustomUser.objects.get(email=email)
+                    if not user.is_active:
+                            return Response({"message": "Your account has been deactivated by admin"},status=status.HTTP_403_FORBIDDEN)
                     
                 if user.check_password(password):
                     refresh = RefreshToken.for_user(user)
