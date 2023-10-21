@@ -118,6 +118,7 @@ class StaffSerializer(serializers.ModelSerializer):
             'name': validated_data.get('name', instance.user.name),
             'phone': validated_data.get('phone', instance.user.phone),
             'email': new_email,
+            'is_active':validated_data.get('is_active', instance.user.is_active),
         }
         
         user = instance.user
