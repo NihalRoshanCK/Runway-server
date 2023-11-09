@@ -1,0 +1,97 @@
+version: '3'
+
+networks:
+  runway_network:
+    driver: bridge
+
+services:
+  app:
+    build: .
+    command: gunicorn Runway_backend.wsgi --bind  0.0.0.0:8000
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+      - .:/app/static/admin
+    env_file:
+      - Runway_backend/.env
+    depends_on:
+      - db
+      # - redis
+    networks:
+      - runway_network
+
+  db:
+    image: postgis/postgis
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: nihal
+      POSTGRES_DB: Runway
+    volumes:
+      - ./data/postgresql:/var/lib/postgres
+      
+    ports:  
+      - "5432:5432"
+    networks:
+      - runway_network
+
+  socket:
+    build: .
+    command: daphne -b 0.0.0.0 -p 8001 Runway_backend.asgi:application
+    ports:
+      - "8001:8001"
+    env_file:
+      - Runway_backend/.env
+    depends_on:
+      - db
+      - redis
+    networks:
+      - runway_network
+
+  redis:
+    image: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - runway_network
+
+  celery:
+    build: .
+    command: celery -A Runway_backend worker --loglevel=info
+    depends_on:
+      - db
+      - redis
+    networks:
+      - runway_network
+
+  celery-beat:
+    build: .
+    command: celery -A Runway_backend beat --loglevel=info
+    depends_on:
+      - db
+      - redis
+      - celery
+      # - migrate
+    networks:
+      - runway_network
+  # volumes:
+  #   - .:/app/static
+
+  # migrate:
+  #   build: .
+  #   command: python manage.py migrate
+  #   env_file:
+  #     - Runway_backend/.env
+  #   depends_on:
+  #     - db
+  #   networks:
+  #     - runway_network
+  # superuser:
+  #   build: .
+  #   command: python manage.py createsuperuser
+  #   env_file:
+  #     - Runway_backend/.env
+  #   depends_on:
+  #     - db
+  #   networks:
+  #     - runway_network

@@ -1,0 +1,26 @@
+docker build --tag runway-backend .
+docker run --publish 8000:8000 runway-backend
+
+
+
+#migrations 
+docker-compose run app python manage.py migrate
+
+
+#build
+docker-compose build
+
+
+#up
+docker-compose up
+
+#down
+docker-compose down
+
+#get inside the image
+docker exec -it runway_backend-app-1 /bin/bash
+
+#run tests
+docker-compose run app python manage.py test
+
+#create superuser for admin panel
