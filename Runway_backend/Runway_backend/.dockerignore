@@ -1,2 +1,9 @@
 .git
-../djvenv
+../djvenv*
+compose
+data*
+Dockerfille*
+.env
+*/bin
+*/obj
+.vscode

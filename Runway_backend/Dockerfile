@@ -5,7 +5,7 @@ FROM python:3.10
 ENV PYTHONUNBUFFERED 1
 
 # Install system dependencies including libgdal-dev and libffi-dev
-RUN apt-get update && apt-get install -y libgdal-dev libffi-dev
+RUN apt-get update && apt-get install -y libgdal-dev libffi-dev 
 
 # Set the working directory to /app
 WORKDIR /app
@@ -14,10 +14,12 @@ WORKDIR /app
 COPY requirements.txt requirements.txt
 
 # Upgrade pip and setuptools
-RUN pip install --upgrade pip setuptools
+RUN pip install --upgrade pip setuptools 
 
 # Install Python dependencies using pip
-RUN pip install -r requirements.txt
+RUN pip install -r requirements.txt 
+# && python manage.py makemigrations && python manage.py migrate
+
 
 # Copy the rest of the application code into the container
 COPY . .

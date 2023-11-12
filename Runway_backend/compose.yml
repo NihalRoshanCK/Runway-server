@@ -12,7 +12,7 @@ services:
       - "8000:8000"
     volumes:
       - .:/app
-      - .:/app/static/admin
+      -  ./static/admin:/app/static/admin
     env_file:
       - Runway_backend/.env
     depends_on:
