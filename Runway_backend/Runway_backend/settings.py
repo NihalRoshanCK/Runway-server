@@ -37,7 +37,7 @@ USE_TZ = True
 SECRET_KEY = env('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env('DEBUG_STATE')
 
 ALLOWED_HOSTS = ["*"]
 
@@ -138,11 +138,11 @@ DATABASES = {
 
     'default': {
         "ENGINE": env('ENGINE'),
-        'NAME': env('NAME'),
-        'USER': env('USER'),
-        'PASSWORD':env('PASSWORD'),
-        'HOST': env('HOST'),
-        'PORT':env('PORT')
+        'NAME': env('DB_NAME'),
+        'USER': env('DB_USERNAME'),
+        'PASSWORD':env('DB_PASSWORD'),
+        'HOST': env('DB_HOSTNAME'),
+        'PORT':env('DB_PORT')
             }
 }
 
@@ -216,7 +216,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'static/') 
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+STATIC_ROOT = '/app/static_root/'
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 

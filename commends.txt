@@ -24,3 +24,7 @@ docker exec -it runway_backend-app-1 /bin/bash
 docker-compose run app python manage.py test
 
 #create superuser for admin panel
+
+
+#to automated  
+docker-compose -f compose.yml up --build

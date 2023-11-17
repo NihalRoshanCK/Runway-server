@@ -7,29 +7,39 @@ networks:
 services:
   app:
     build: .
-    command: gunicorn Runway_backend.wsgi --bind  0.0.0.0:8000
+    # restart: always
+    container_name: gunicorn
+    command: gunicorn Runway_backend.wsgi --bind 0.0.0.0:8000
     ports:
       - "8000:8000"
     volumes:
-      - .:/app
-      -  ./static/admin:/app/static/admin
+      # - .:/app
+      - static_volume:/app/static
+      - media_volume:/app/media
     env_file:
-      - Runway_backend/.env
-    depends_on:
-      - db
-      # - redis
+      - ./Runway_backend/.env
     networks:
       - runway_network
+    depends_on:
+      - db
+    # healthcheck:
+    #   test: ["CMD", "curl", "--fail", "http://localhost:8000/healthcheck"]
+    #   interval: 10s
+    #   timeout: 5s
+    #   retries: 3
+
 
   db:
     image: postgis/postgis
+    # restart: always
+    container_name: postgis
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: nihal
-      POSTGRES_DB: Runway
+      - POSTGRES_USER=nihal
+      - POSTGRES_PASSWORD=nihal
+      - POSTGRES_DB=runway
+      # - POSTGRES_PORT= DB_PORT  
     volumes:
-      - ./data/postgresql:/var/lib/postgres
-      
+      - postgres_data:/var/lib/postgresql/data/
     ports:  
       - "5432:5432"
     networks:
@@ -37,6 +47,7 @@ services:
 
   socket:
     build: .
+    container_name: daphne
     command: daphne -b 0.0.0.0 -p 8001 Runway_backend.asgi:application
     ports:
       - "8001:8001"
@@ -50,6 +61,7 @@ services:
 
   redis:
     image: redis
+    container_name: redis
     ports:
       - "6379:6379"
     networks:
@@ -57,6 +69,8 @@ services:
 
   celery:
     build: .
+    # restart: always
+    container_name: celery_worker
     command: celery -A Runway_backend worker --loglevel=info
     depends_on:
       - db
@@ -66,6 +80,8 @@ services:
 
   celery-beat:
     build: .
+    # restart: always
+    container_name: celery_beat
     command: celery -A Runway_backend beat --loglevel=info
     depends_on:
       - db
@@ -74,6 +90,32 @@ services:
       # - migrate
     networks:
       - runway_network
+
+
+  nginx:
+    build: ./nginx
+    container_name: nginx
+    # restart: always
+    volumes:
+      - static_volume:/app/static
+      - media_volume:/app/media
+    ports:
+      - "80:80"
+    depends_on:
+      - app
+      - socket
+    networks:
+      - runway_network
+volumes:
+  postgres_data:
+  static_volume:
+  media_volume:
+# volume:
+#   - type: bind
+#     source: D:\Runway\Runway_backend\data\postgresql
+#     target: /var/lib/postgres
+#     bind:
+#       create_host_path: true
   # volumes:
   #   - .:/app/static
 
