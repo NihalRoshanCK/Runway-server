@@ -34,6 +34,8 @@ django-location-field
 django-timezone-field
 djangorestframework
 djangorestframework-simplejwt
+drf-spectacular==0.26.5
+drf-yasg==1.21.7
 docopt
 Fiona
 # GDAL
@@ -63,6 +65,7 @@ pyOpenSSL
 pyotp
 PyPrind
 pyproj
+PyYAML==6.0.1
 pySmartDL
 python-crontab
 python-dateutil
@@ -81,6 +84,7 @@ typing_extensions
 tzdata
 tzlocal
 urllib3
+uritemplate==4.1.1
 vine
 wcwidth
 zope.interface

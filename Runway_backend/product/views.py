@@ -35,7 +35,7 @@ class BookingViewSet(viewsets.ModelViewSet):
 class PaymentViewSet(viewsets.ModelViewSet):
     queryset=Payment.objects.all()
     serializer_class = PaymentSerializer
-    pagination_class=[permissions.IsAuthenticated]
+    permission_classes=[permissions.IsAuthenticated]
     
     def create(self, request, *args, **kwargs):
         serializer = PaymentSerializer(data=request.data)
@@ -114,6 +114,7 @@ class OrderViewSet(viewsets.ModelViewSet):
             return super().partial_update(request, *args, **kwargs)
         else:
             raise ValidationError("You are not allowed to update this order.")
+        
     @action(detail=False, methods=['GET'])
     def pending_oders(self, request):
         if request.user._is_superuser:

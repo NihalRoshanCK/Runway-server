@@ -48,6 +48,7 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
         fields ='__all__'
+        ref_name = 'HubsUser'
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
@@ -84,6 +85,7 @@ class StaffSerializer(serializers.ModelSerializer):
     class Meta:
         model = Staff
         fields = '__all__'
+        ref_name = 'AdminsStaff'
         extra_kwargs = {'password': {'write_only': True}}
     def create(self, validated_data):
         staff_data={

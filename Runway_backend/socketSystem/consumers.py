@@ -192,7 +192,7 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
             'content': content['content'],
             "message_type":"text",
             'timestamp': str(datetime.datetime.now()),
-        }   
+        }
         message=await save_message(message_data)
         sender_user = await serializeUser(self.scope['user'].id)
         # await self.send_group_message(message_data)

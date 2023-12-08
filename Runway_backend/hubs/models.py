@@ -8,7 +8,7 @@ class Hub(models.Model):
     location = models.PointField(geography=True, srid=4326,unique=True)
     hub_head = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, related_name='hubs')
     is_hotspot=models.BooleanField(default=False)
-    is_active=models.BooleanField(default=False)
+    is_active=models.BooleanField(default=True)
     number = models.BigIntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
 

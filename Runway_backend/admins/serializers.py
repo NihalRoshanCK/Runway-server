@@ -18,6 +18,7 @@ class StaffSerializer(ModelSerializer):
     user = UserStaffSerializer()
     class Meta:
         model = Staff
+        ref_name = 'AdminsStaff'
         fields = '__all__'
         
 class HubSerializer(ModelSerializer):
